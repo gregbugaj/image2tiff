@@ -36,8 +36,14 @@ PIX* load(const string_t& path)
 {
     PIX *data;
     // We are checking the image based on the extension
-    const string_t ext = ".png";
-    if (path.compare(path.length() - ext.length(), ext.length(), ext) == 0)
+    auto found = path.find_last_of('.');
+    string_t ext;
+
+    if(found != std::string::npos){
+        ext = path.substr(found, path.length()-1);
+    }
+
+    if (ext == ".png")
     {
         FILE *pfile = fopenReadStream(path.c_str());
         if (pfile != nullptr)
@@ -46,10 +52,14 @@ PIX* load(const string_t& path)
             lept_fclose(pfile);
         }
     }
+    else if (ext == ".tif" || ext == ".tiff")
+    {
+        data = pixReadTiff(path.c_str(), 0);
+    }
     else
     {
-        // assuming TIFF
-        data = pixReadTiff(path.c_str(), 0);
+        // everything else
+        data = pixRead(path.c_str());
     }
 
     return data;
